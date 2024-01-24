@@ -18,10 +18,25 @@ export class Cdkprojuser1Stack extends cdk.Stack {
       type: 'Number'
     }) 
 
-   const buck =  new Bucket(this, "mybucketUser1_2" , {
+    const expiryDuration = new cdk.CfnParameter(this, 'expiryDuration', {
+      minValue : 90,
+      maxValue : 200,
+      type: 'Number',
+      default : 120
+    })
+
+      const bucketNameParam = new cdk.CfnParameter(this, 'bucketName', {
+        type: 'String',
+        minLength: 5,
+        maxLength: 20,
+        default: "mybucketUser1_2"
+      })
+
+   const buck =  new Bucket(this, "bucketIdwithParamName" , {
+      bucketName : bucketNameParam.valueAsString,
       lifecycleRules : [
         {
-          expiration : cdk.Duration.days(180)
+          expiration : cdk.Duration.days(expiryDuration.valueAsNumber)
         },
         {
           objectSizeGreaterThan: maxObjSizeParam.valueAsNumber,
