@@ -11,20 +11,27 @@ export class Cdkprojuser1Stack extends cdk.Stack {
     super(scope, id, props);
     // const ls = new LogStorageBucket(this, 'MyProjectLogs');
     
-   const buck =  new Bucket(this, "mybucketUser1" , {
+    const maxObjSizeParam = new cdk.CfnParameter(this, 'maxObjSize',{
+      default : 1024,
+      minValue : 512,
+      maxValue : 2048,
+      type: 'Number'
+    }) 
+
+   const buck =  new Bucket(this, "mybucketUser1_2" , {
       lifecycleRules : [
         {
-          expiration : cdk.Duration.days(2)
+          expiration : cdk.Duration.days(180)
         },
         {
-          objectSizeGreaterThan: 128,
+          objectSizeGreaterThan: maxObjSizeParam.valueAsNumber,
           expiration : cdk.Duration.days(3)
           
         }
       ]
   });
 
-    new cdk.CfnOutput(this, 'BucketId', {
+    new cdk.CfnOutput(this, 'BucketNameOfmybucketUser1', {
       value: buck.bucketName
     })
 
