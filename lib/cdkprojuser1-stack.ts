@@ -8,6 +8,7 @@ import * as secretsmanager from 'aws-cdk-lib/aws-secretsmanager';
 import {getGenericSecret } from './scretstring';
 import * as rds from 'aws-cdk-lib/aws-rds';
 import { CfnOutcome } from 'aws-cdk-lib/aws-frauddetector';
+import * as s3deploy from 'aws-cdk-lib/aws-s3-deployment';
 
 export class Cdkprojuser1Stack extends cdk.Stack {
 
@@ -15,48 +16,55 @@ export class Cdkprojuser1Stack extends cdk.Stack {
 
     super(scope, id, props);
 
-    const usernameInput = new cdk.CfnParameter(this, 'dbusername', {
-      minLength: 5,
-      maxLength: 10,
-      default: 'dbroot',
-      type: 'String'
+    const s3b = Bucket.fromBucketName(this, 'existingbucket', 'bucketfromparam')
+    new s3deploy.BucketDeployment(this, 'deployfiles', {
+      destinationBucket: s3b,
+      sources: [s3deploy.Source.asset('./code')]
     })
 
-// Create a secret
-    const dbpassword = new secretsmanager.Secret(this, 'dbsecretId', {
-      secretName: 'dbcreds',
-      generateSecretString: getGenericSecret(usernameInput)
-    })
 
-    const existingDefaultVpc = Vpc.fromLookup(this, 'default', {
-      isDefault: true
-    })
+//     const usernameInput = new cdk.CfnParameter(this, 'dbusername', {
+//       minLength: 5,
+//       maxLength: 10,
+//       default: 'dbroot',
+//       type: 'String'
+//     })
 
-    const microinstance = ec2.InstanceType.of(ec2.InstanceClass.T3, ec2.InstanceSize.MICRO)
-    const engine = rds.DatabaseInstanceEngine.POSTGRES
-    const dbport = 5432
-    const secGroup = new ec2.SecurityGroup(this, 'secGroupForDB', {
-      vpc: existingDefaultVpc
-    });
+// // Create a secret
+//     const dbpassword = new secretsmanager.Secret(this, 'dbsecretId', {
+//       secretName: 'dbcreds',
+//       generateSecretString: getGenericSecret(usernameInput)
+//     })
+
+//     const existingDefaultVpc = Vpc.fromLookup(this, 'default', {
+//       isDefault: true
+//     })
+
+//     const microinstance = ec2.InstanceType.of(ec2.InstanceClass.T3, ec2.InstanceSize.MICRO)
+//     const engine = rds.DatabaseInstanceEngine.POSTGRES
+//     const dbport = 5432
+//     const secGroup = new ec2.SecurityGroup(this, 'secGroupForDB', {
+//       vpc: existingDefaultVpc
+//     });
     
-    secGroup.addIngressRule(
-      ec2.Peer.anyIpv4(), 
-      ec2.Port.tcp(dbport))
+//     secGroup.addIngressRule(
+//       ec2.Peer.anyIpv4(), 
+//       ec2.Port.tcp(dbport))
 
-    const createdDb = new rds.DatabaseInstance(this, 'mydb', {
-      engine: engine,
-      instanceType: microinstance,
-      vpc: existingDefaultVpc,
-      credentials: rds.Credentials.fromGeneratedSecret('dbcreds'),
-      port: dbport,
-      vpcSubnets: {subnetType: ec2.SubnetType.PUBLIC},
-      securityGroups: [secGroup],
-      removalPolicy: cdk.RemovalPolicy.DESTROY
-    })
+//     const createdDb = new rds.DatabaseInstance(this, 'mydb', {
+//       engine: engine,
+//       instanceType: microinstance,
+//       vpc: existingDefaultVpc,
+//       credentials: rds.Credentials.fromGeneratedSecret('dbcreds'),
+//       port: dbport,
+//       vpcSubnets: {subnetType: ec2.SubnetType.PUBLIC},
+//       securityGroups: [secGroup],
+//       removalPolicy: cdk.RemovalPolicy.DESTROY
+//     })
   
-    new cdk.CfnOutput(this, 'dbid', {
-      value: createdDb.dbInstanceEndpointAddress
-    })
+//     new cdk.CfnOutput(this, 'dbid', {
+//       value: createdDb.dbInstanceEndpointAddress
+//     })
 
     // const v = secretsmanager.Secret.fromSecretNameV2(this, 'exsiting key', 'dbcreds')
 
