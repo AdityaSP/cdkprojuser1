@@ -12,3 +12,4 @@ new Cdkprojuser1Stack(app, 'Cdkprojuser1Stack', {
         region: process.env.CDK_DEFAULT_REGION
     }
 });
+

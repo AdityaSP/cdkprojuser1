@@ -6,6 +6,8 @@ import { LogStorageBucket } from './constructs/logstoragebucket';
 import { KeyPair, Vpc } from 'aws-cdk-lib/aws-ec2';
 import * as secretsmanager from 'aws-cdk-lib/aws-secretsmanager';
 import {getGenericSecret } from './scretstring';
+import * as rds from 'aws-cdk-lib/aws-rds';
+import { CfnOutcome } from 'aws-cdk-lib/aws-frauddetector';
 
 export class Cdkprojuser1Stack extends cdk.Stack {
 
@@ -26,7 +28,35 @@ export class Cdkprojuser1Stack extends cdk.Stack {
       generateSecretString: getGenericSecret(usernameInput)
     })
 
+    const existingDefaultVpc = Vpc.fromLookup(this, 'default', {
+      isDefault: true
+    })
 
+    const microinstance = ec2.InstanceType.of(ec2.InstanceClass.T3, ec2.InstanceSize.MICRO)
+    const engine = rds.DatabaseInstanceEngine.POSTGRES
+    const dbport = 5432
+    const secGroup = new ec2.SecurityGroup(this, 'secGroupForDB', {
+      vpc: existingDefaultVpc
+    });
+    
+    secGroup.addIngressRule(
+      ec2.Peer.anyIpv4(), 
+      ec2.Port.tcp(dbport))
+
+    const createdDb = new rds.DatabaseInstance(this, 'mydb', {
+      engine: engine,
+      instanceType: microinstance,
+      vpc: existingDefaultVpc,
+      credentials: rds.Credentials.fromGeneratedSecret('dbcreds'),
+      port: dbport,
+      vpcSubnets: {subnetType: ec2.SubnetType.PUBLIC},
+      securityGroups: [secGroup],
+      removalPolicy: cdk.RemovalPolicy.DESTROY
+    })
+  
+    new cdk.CfnOutput(this, 'dbid', {
+      value: createdDb.dbInstanceEndpointAddress
+    })
 
     // const v = secretsmanager.Secret.fromSecretNameV2(this, 'exsiting key', 'dbcreds')
 
