@@ -15,13 +15,18 @@ export class Cdkprojuser1Stack extends cdk.Stack {
       isDefault: true
     })
 
-    const existingKeyPair = KeyPair.fromKeyPairName(this, 'aditya-key-pair', 'aditya-trainer-key');
+    const keypairname = new cdk.CfnParameter(this, 'keypairname', {
+      type: 'String'
+    })
+
+    const existingKeyPair = KeyPair.fromKeyPairName(this, 'aditya-key-pair', keypairname.valueAsString);
 
     const amazonLinuxImage = new ec2.AmazonLinuxImage();
 
     const microinstance = ec2.InstanceType.of(ec2.InstanceClass.T2, ec2.InstanceSize.MICRO)
 
     const myinstance = new ec2.Instance(this, 'MicroInstanceFromStack', {
+      
       vpc: existingDefaultVpc,
       instanceType: microinstance,
       keyPair: existingKeyPair,
