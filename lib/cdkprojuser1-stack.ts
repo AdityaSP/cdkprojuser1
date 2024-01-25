@@ -5,6 +5,7 @@ import { Construct } from 'constructs';
 import { LogStorageBucket } from './constructs/logstoragebucket';
 import { KeyPair, Vpc } from 'aws-cdk-lib/aws-ec2';
 import * as secretsmanager from 'aws-cdk-lib/aws-secretsmanager';
+import {getGenericSecret } from './scretstring';
 
 export class Cdkprojuser1Stack extends cdk.Stack {
 
@@ -12,15 +13,23 @@ export class Cdkprojuser1Stack extends cdk.Stack {
 
     super(scope, id, props);
 
+    const usernameInput = new cdk.CfnParameter(this, 'dbusername', {
+      minLength: 5,
+      maxLength: 10,
+      default: 'dbroot',
+      type: 'String'
+    })
 
 // Create a secret
     const dbpassword = new secretsmanager.Secret(this, 'dbsecretId', {
       secretName: 'dbcreds',
-      generateSecretString:{
-        secretStringTemplate: JSON.stringify({username: 'dbroot'}),
-        generateStringKey: 'password'
-      }
+      generateSecretString: {
+                secretStringTemplate: JSON.stringify({username: usernameInput.valueAsString }),
+                generateStringKey: 'password'
+            }
     })
+
+
 
     // const v = secretsmanager.Secret.fromSecretNameV2(this, 'exsiting key', 'dbcreds')
 
