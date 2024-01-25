@@ -1,9 +1,9 @@
 import * as cdk from 'aws-cdk-lib';
 import { Bucket } from "aws-cdk-lib/aws-s3";
-
+import * as ec2 from 'aws-cdk-lib/aws-ec2';
 import { Construct } from 'constructs';
 import { LogStorageBucket } from './constructs/logstoragebucket';
-import { Vpc } from 'aws-cdk-lib/aws-ec2';
+import { KeyPair, Vpc } from 'aws-cdk-lib/aws-ec2';
 
 export class Cdkprojuser1Stack extends cdk.Stack {
 
@@ -15,11 +15,29 @@ export class Cdkprojuser1Stack extends cdk.Stack {
       isDefault: true
     })
 
-    new cdk.CfnOutput(this, 'DefaultVPCId', {
-      value: existingDefaultVpc.vpcId
-    })
+    const existingKeyPair = KeyPair.fromKeyPairName(this, 'aditya-key-pair', 'aditya-trainer-key');
 
-    
+    const amazonLinuxImage = new ec2.AmazonLinuxImage();
+
+    const microinstance = ec2.InstanceType.of(ec2.InstanceClass.T2, ec2.InstanceSize.MICRO)
+
+    const myinstance = new ec2.Instance(this, 'MicroInstanceFromStack', {
+      vpc: existingDefaultVpc,
+      instanceType: microinstance,
+      keyPair: existingKeyPair,
+      machineImage: amazonLinuxImage
+    });
+
+    new cdk.CfnOutput(this, 'MyInstanceId', {
+      value: myinstance.instanceId
+    });
+
+    // new cdk.CfnOutput(this, 'DefaultVPCId', {
+    //   value: existingDefaultVpc.vpcId
+    // })
+
+
+
     // const ls = new LogStorageBucket(this, 'MyProjectLogs');
 
     
