@@ -17,6 +17,8 @@ export class Cdkprojuser1Stack extends cdk.Stack {
     super(scope, id, props);
 
     const s3b = Bucket.fromBucketName(this, 'existingbucket', 'bucketfromparam')
+
+  
     new s3deploy.BucketDeployment(this, 'deployfiles', {
       destinationBucket: s3b,
       sources: [s3deploy.Source.asset('./code')]
