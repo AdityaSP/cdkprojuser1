@@ -4,6 +4,7 @@ import * as ec2 from 'aws-cdk-lib/aws-ec2';
 import { Construct } from 'constructs';
 import { LogStorageBucket } from './constructs/logstoragebucket';
 import { KeyPair, Vpc } from 'aws-cdk-lib/aws-ec2';
+import * as secretsmanager from 'aws-cdk-lib/aws-secretsmanager';
 
 export class Cdkprojuser1Stack extends cdk.Stack {
 
@@ -11,31 +12,44 @@ export class Cdkprojuser1Stack extends cdk.Stack {
 
     super(scope, id, props);
 
-    const existingDefaultVpc = Vpc.fromLookup(this, 'default', {
-      isDefault: true
+
+// Create a secret
+    const dbpassword = new secretsmanager.Secret(this, 'dbsecretId', {
+      secretName: 'dbcreds',
+      generateSecretString:{
+        secretStringTemplate: JSON.stringify({username: 'dbroot'}),
+        generateStringKey: 'password'
+      }
     })
 
-    const keypairname = new cdk.CfnParameter(this, 'keypairname', {
-      type: 'String'
-    })
+    // const v = secretsmanager.Secret.fromSecretNameV2(this, 'exsiting key', 'dbcreds')
 
-    const existingKeyPair = KeyPair.fromKeyPairName(this, 'aditya-key-pair', keypairname.valueAsString);
 
-    const amazonLinuxImage = new ec2.AmazonLinuxImage();
+    // const existingDefaultVpc = Vpc.fromLookup(this, 'default', {
+    //   isDefault: true
+    // })
 
-    const microinstance = ec2.InstanceType.of(ec2.InstanceClass.T2, ec2.InstanceSize.MICRO)
+    // const keypairname = new cdk.CfnParameter(this, 'keypairname', {
+    //   type: 'String'
+    // })
 
-    const myinstance = new ec2.Instance(this, 'MicroInstanceFromStack', {
+    // const existingKeyPair = KeyPair.fromKeyPairName(this, 'aditya-key-pair', keypairname.valueAsString);
+
+    // const amazonLinuxImage = new ec2.AmazonLinuxImage();
+
+    // const microinstance = ec2.InstanceType.of(ec2.InstanceClass.T2, ec2.InstanceSize.MICRO)
+
+    // const myinstance = new ec2.Instance(this, 'MicroInstanceFromStack', {
       
-      vpc: existingDefaultVpc,
-      instanceType: microinstance,
-      keyPair: existingKeyPair,
-      machineImage: amazonLinuxImage
-    });
+    //   vpc: existingDefaultVpc,
+    //   instanceType: microinstance,
+    //   keyPair: existingKeyPair,
+    //   machineImage: amazonLinuxImage
+    // });
 
-    new cdk.CfnOutput(this, 'MyInstanceId', {
-      value: myinstance.instanceId
-    });
+    // new cdk.CfnOutput(this, 'MyInstanceId', {
+    //   value: myinstance.instanceId
+    // });
 
     // new cdk.CfnOutput(this, 'DefaultVPCId', {
     //   value: existingDefaultVpc.vpcId
