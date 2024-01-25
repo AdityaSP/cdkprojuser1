@@ -23,10 +23,7 @@ export class Cdkprojuser1Stack extends cdk.Stack {
 // Create a secret
     const dbpassword = new secretsmanager.Secret(this, 'dbsecretId', {
       secretName: 'dbcreds',
-      generateSecretString: {
-                secretStringTemplate: JSON.stringify({username: usernameInput.valueAsString }),
-                generateStringKey: 'password'
-            }
+      generateSecretString: getGenericSecret(usernameInput)
     })
 
 

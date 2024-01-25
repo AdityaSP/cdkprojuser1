@@ -4,17 +4,10 @@ import { Construct } from 'constructs';
 import * as cdk from 'aws-cdk-lib';
 
 
-// export function getGenericSecret(scope: Construct) {
-
-//     const inputparam = new CfnParameter(scope, 'dbusernameinput', {
-//         type: "String"
-//     })
-
-//     const genericSecret : secretsmanager.SecretStringGenerator = {
-//         secretStringTemplate: JSON.stringify({username: inputparam.valueAsString }),
-//         generateStringKey: 'password'
-//     }
-
-//     return genericSecret;
-
-// }
+export function getGenericSecret(inputparam :CfnParameter){
+    const generic =  {
+        secretStringTemplate: JSON.stringify({username: inputparam.valueAsString }),
+        generateStringKey: 'password'
+    }
+    return generic;
+}
